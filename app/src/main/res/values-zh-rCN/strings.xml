@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">设置</string>
+    <string name="scanning">扫描中...</string>
+
+    <string name="control">控制</string>
+    <string name="control_left">左手控车</string>
+    <string name="control_right">右手控车</string>
+    <string name="ble">蓝牙</string>
+    <string name="web_cam">WIFI 摄像头</string>
+    <string name="save">保存</string>
+    <string name="ble_scan">扫描 BLE</string>
+    <string name="conn_web_cam">查看</string>
+
+    <!-- BLE -->
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="ready">Ready</string>
+
+    <string name="unknown_device">Unknown device</string>
+    <string name="without_service">Without Soft Serial Service</string>
+
+    <!-- Menu items -->
+    <string name="menu_connect">连接</string>
+    <string name="menu_disconnect">断开</string>
+    <string name="menu_scan">扫描</string>
+    <string name="menu_stop">停止</string>
+    <string name="is_serial">Serial Present:</string>
+    <string name="app_name">mTank</string>
+
+</resources>

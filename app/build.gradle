@@ -1,0 +1,33 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    useLibrary 'org.apache.http.legacy'
+
+    defaultConfig {
+        applicationId "me.iasc.microduino.mcar.app"
+        minSdkVersion 19
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            lintOptions { disable 'MissingTranslation' }
+        }
+    }
+    sourceSets.main.jni.srcDirs = []
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':bugstick')
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.google.android.gms:play-services-analytics:8.3.0'
+    compile 'com.getbase:floatingactionbutton:1.10.1'
+}

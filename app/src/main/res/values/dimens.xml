@@ -1,0 +1,30 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">8dp</dimen>
+    <dimen name="activity_vertical_margin">8dp</dimen>
+
+    <dimen name="cam_horizontal_margin">0dp</dimen>
+    <dimen name="cam_vertical_margin">0dp</dimen>
+
+    <dimen name="cam_target_size">160dp</dimen>
+
+    <dimen name="stick_margin_side">27dp</dimen>
+    <dimen name="stick_margin_bottom">27dp</dimen>
+
+    <dimen name="stick_info_size">18dp</dimen>
+
+    <dimen name="stick_size">78dp</dimen>
+    <dimen name="half_stick_size">36dp</dimen>
+    <dimen name="stick_pad_size">156dp</dimen>
+
+    <dimen name="cam_button_size">80dp</dimen>
+
+    <dimen name="aux_button_height">40dp</dimen>
+    <dimen name="aux_button_width">40dp</dimen>
+    <dimen name="aux_with_stick">10dp</dimen>
+
+    <dimen name="setting_vertical_margin">20dp</dimen>
+
+    <dimen name="popup_width">600dp</dimen>
+    <dimen name="popup_height">400dp</dimen>
+</resources>
