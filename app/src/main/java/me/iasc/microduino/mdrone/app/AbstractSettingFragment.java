@@ -1,4 +1,4 @@
-package me.iasc.microduino.mcar.app;
+package me.iasc.microduino.mdrone.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,42 +19,39 @@ import me.iasc.microduino.ble.BluetoothLeService;
 
 import java.util.ArrayList;
 
-public class SettingFragment extends DialogFragment
-{
-    private static final String TAG = SettingFragment.class.getSimpleName();
+public abstract class AbstractSettingFragment extends DialogFragment {
+    private static final String TAG = AbstractSettingFragment.class.getSimpleName();
 
     public static final String SET_RIGHT_HAND = "right_HAND";
-    public static final String SET_BLE_SEND_INTERVAL = "curr_ble_send_interval";
-    public static final String SET_BLOCK_SEND_INTERVAL = "curr_block_send_interval";
     public static final String SET_BLE_ADDRESS = "curr_ble_ADDRESS";
     public static final String SET_WEB_CAM_ADDRESS = "curr_web_cam_ADDRESS";
 
-    private CarControlActivity parentActivity;
-    private OnFragmentInteractionListener mListener;
+    protected AbstractVehicleControlActivity parentActivity;
+    protected OnFragmentInteractionListener mListener;
 
     static SharedPreferences settings;
     static SharedPreferences.Editor editor;
 
-    boolean rightHand = true;
-    String currBleAdr, currWebCamAdr;
-    int bleSendInterval = AbstractBleControlActivity.BLE_MSG_SEND_INTERVAL;
-    int blockSendInterval = AbstractBleControlActivity.BLE_BLOCK_SEND_INTERVAL;
+    protected View view = null;
 
-    Switch rightSwitch;
-    Button scanButton, saveButton;
-    EditText editBleAddr, editWebCamAddr, editBleSendInterval, editBlockSendInterval;
+    protected boolean rightHand = true;
+    protected String currBleAdr, currWebCamAdr;
+
+    protected Switch rightSwitch;
+    protected Button scanButton, saveButton;
+    protected EditText editBleAddr, editWebCamAddr;
 
     ///////////////////////
     // Bluttooth Scan
 
-    private BluetoothLeService mBluetoothLeService;
+    protected BluetoothLeService mBluetoothLeService;
 
-    private static final long SCAN_PERIOD = 10000;  // Stops scanning after 10 seconds.
+    protected static final long SCAN_PERIOD = 10000;  // Stops scanning after 10 seconds.
 
-    private static boolean bleIsScanning;
-    private Handler mHandler;
+    protected static boolean bleIsScanning;
+    protected Handler mHandler;
 
-    private LeDeviceListAdapter mLeDeviceListAdapter;
+    protected LeDeviceListAdapter mLeDeviceListAdapter;
 
     /**
      * Use this factory method to create a new instance of
@@ -62,29 +59,26 @@ public class SettingFragment extends DialogFragment
      *
      * @return A new instance of fragment SettingFragment.
      */
-    public static SettingFragment newInstance() {
-        SettingFragment fragment = new SettingFragment();
-        return fragment;
+    public static AbstractSettingFragment newInstance() {
+        return null;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        // View view = inflater.inflate(R.layout.tank_setting, container, false);
+
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        parentActivity = (CarControlActivity) getActivity();
+        parentActivity = (AbstractVehicleControlActivity) getActivity();
 
         settings = PreferenceManager.getDefaultSharedPreferences(parentActivity);
         readSetting();
 
         mBluetoothLeService = parentActivity.mBluetoothLeService;
 
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_setting, container, false);
-
         rightSwitch = (Switch) view.findViewById(R.id.rightHand);
-        editBleSendInterval = (EditText) view.findViewById(R.id.msgSendInterval);
-        editBlockSendInterval = (EditText) view.findViewById(R.id.blockSendInterval);
 
         editBleAddr = (EditText) view.findViewById(R.id.bleAdr);
         editBleAddr.setEnabled(false);
@@ -95,8 +89,6 @@ public class SettingFragment extends DialogFragment
         saveButton = (Button) view.findViewById(R.id.btnSave);
 
         rightSwitch.setChecked(rightHand);
-        editBleSendInterval.setText(String.valueOf(bleSendInterval));
-        editBlockSendInterval.setText(String.valueOf(blockSendInterval));
 
         editBleAddr.setText(currBleAdr);
         editWebCamAddr.setText(currWebCamAdr);
@@ -153,24 +145,20 @@ public class SettingFragment extends DialogFragment
         void settingChanged();
     }
 
-    private void readSetting() {
+    protected void readSetting() {
         rightHand = settings.getBoolean(SET_RIGHT_HAND, true);
         currBleAdr = settings.getString(SET_BLE_ADDRESS, null);
         currWebCamAdr = settings.getString(SET_WEB_CAM_ADDRESS, "192.168.1.1:8080");
-        bleSendInterval = settings.getInt(SET_BLE_SEND_INTERVAL, AbstractBleControlActivity.BLE_MSG_SEND_INTERVAL);
-        blockSendInterval = settings.getInt(SET_BLOCK_SEND_INTERVAL, AbstractBleControlActivity.BLE_BLOCK_SEND_INTERVAL);
     }
 
-    private void saveSetting() {
+    protected void saveSetting() {
         editor = settings.edit();
         editor.putBoolean(SET_RIGHT_HAND, rightSwitch.isChecked());
-        editor.putInt(SET_BLE_SEND_INTERVAL, Integer.parseInt(editBleSendInterval.getText().toString()));
-        editor.putInt(SET_BLOCK_SEND_INTERVAL, Integer.parseInt(editBlockSendInterval.getText().toString()));
 
         String bleAddr = editBleAddr.getText().toString().trim();
-        if(bleAddr.length() > 0){
+        if (bleAddr.length() > 0) {
             editor.putString(SET_BLE_ADDRESS, bleAddr);
-        } else{
+        } else {
             editor.remove(SET_BLE_ADDRESS);
         }
 
@@ -178,7 +166,7 @@ public class SettingFragment extends DialogFragment
         editor.commit();
     }
 
-    private void dialogSelectScanBleDevice() {
+    protected void dialogSelectScanBleDevice() {
 
         AlertDialog.Builder builderSingle = new AlertDialog.Builder(getActivity());
         builderSingle.setTitle(R.string.scanning);
@@ -217,13 +205,13 @@ public class SettingFragment extends DialogFragment
         alertDialog.getWindow().setLayout(640, 640); //Controlling width and height
     }
 
-    private void startScan() {
+    protected void startScan() {
         // Initializes list view adapter.
         mLeDeviceListAdapter = new LeDeviceListAdapter();
         scanLeDevice(true);
     }
 
-    private void scanLeDevice(final boolean enable) {
+    protected void scanLeDevice(final boolean enable) {
         if (enable) {
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
@@ -247,7 +235,7 @@ public class SettingFragment extends DialogFragment
     }
 
     // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+    protected BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
 
                 @Override
@@ -262,13 +250,13 @@ public class SettingFragment extends DialogFragment
                 }
             };
 
-    static class DeviceViewHolder {
+    static protected class DeviceViewHolder {
         TextView deviceName;
         TextView deviceAddress;
     }
 
     // Adapter for holding devices found through scanning.
-    private class LeDeviceListAdapter extends BaseAdapter {
+    protected class LeDeviceListAdapter extends BaseAdapter {
         private ArrayList<BluetoothDevice> mLeDevices;
         private LayoutInflater mInflator;
 

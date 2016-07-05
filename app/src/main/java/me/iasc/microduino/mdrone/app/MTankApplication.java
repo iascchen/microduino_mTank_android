@@ -1,4 +1,4 @@
-package me.iasc.microduino.mcar.app;
+package me.iasc.microduino.mdrone.app;
 
 /**
  * Copyright (C) 2015 Iasc CHEN

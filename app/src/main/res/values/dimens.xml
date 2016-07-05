@@ -27,4 +27,6 @@
 
     <dimen name="popup_width">600dp</dimen>
     <dimen name="popup_height">400dp</dimen>
+    <!-- Default screen margins, per the Glass design guidelines. -->
+    <dimen name="card_margin">40px</dimen>
 </resources>

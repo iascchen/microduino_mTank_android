@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package me.iasc.microduino.mcar.app;
+package me.iasc.microduino.mdrone.app;
 
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,7 +41,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.jmedeisis.bugstick.Joystick;
 import com.jmedeisis.bugstick.JoystickListener;
 import me.iasc.microduino.ble.BluetoothLeService;
-import me.iasc.microduino.joypad.JoypadCarCommand;
+import me.iasc.microduino.joypad.JoypadTankCommand;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
@@ -55,7 +54,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * For a given BLE device, this Activity provides the user interface to connect, display data,
@@ -63,19 +61,22 @@ import java.util.TimerTask;
  * communicates with {@code BluetoothLeService}, which in turn interacts with the
  * Bluetooth LE API.
  */
-public class CarControlActivity extends AbstractBleControlActivity
-        implements SensorEventListener, SettingFragment.OnFragmentInteractionListener {
+public abstract class AbstractVehicleControlActivity extends AbstractBleControlActivity
+        implements SensorEventListener, AbstractSettingFragment.OnFragmentInteractionListener {
 
-    private final static String TAG = CarControlActivity.class.getSimpleName();
+    private final static String TAG = AbstractVehicleControlActivity.class.getSimpleName();
 
-    static boolean rightHand = true;
-    static boolean webCam = false;
-    static boolean webSuspending = false;
+    protected static boolean rightHand = true;
+    protected static boolean webCam = false;
+    protected static boolean webSuspending = false;
 
-    static int PROCESSING_TIME = 10;
+    protected static int PROCESSING_TIME = 10;
 
-    static String currWebCamAdr;
-    static int threshold = 500,
+    protected static String currWebCamAdr;
+
+    protected static int JOYSTICK_MIDDLE = 1500, JOYSTICK_FULL_THRESHOLD = 450, JOYSTICK_MICRO_THRESHOLD = 200;
+
+    protected static int threshold = JOYSTICK_FULL_THRESHOLD,
             msgSendInterval = BLE_MSG_SEND_INTERVAL, blockSendInterval = BLE_BLOCK_SEND_INTERVAL,
             bleTimerInterval = BLE_MSG_SEND_INTERVAL + BLE_BLOCK_SEND_INTERVAL + PROCESSING_TIME;
 
@@ -86,28 +87,28 @@ public class CarControlActivity extends AbstractBleControlActivity
     public int channelRightX = STEERING, channelRightY = THROTTLE, channelLeftX = ROLL, channelLeftY = PITCH,
             channelBtn1 = AUX1, channelBtn2 = AUX2, channelBtn3 = AUX3, channelBtn4 = AUX4;
 
-    static SharedPreferences settings;
+    protected static SharedPreferences settings;
 
-    private FloatingActionButton button1, button2, button3, button4;
-    private FloatingActionButton btnSetting, btnCamera;
-    private Joystick joystickLeft, joystickRight;
-    private Button stickLeft, stickRight;
-    private ImageView stickLeftInfo, stickRightInfo, camTarget;
+    protected FloatingActionButton button1, button2, button3, button4;
+    protected FloatingActionButton btnSetting, btnCamera;
+    protected Joystick joystickLeft, joystickRight;
+    protected Button stickLeft, stickRight;
+    protected ImageView stickLeftInfo, stickRightInfo, camTarget;
 
-    MjpegView camView;
+    protected MjpegView camView;
 
-    private SensorManager mSensorManager;
-    private Sensor mAccelerometer;
+    protected SensorManager mSensorManager;
+    protected Sensor mAccelerometer;
 
-    private static Timer cmdSendTimer;
+    protected static Timer cmdSendTimer;
 
-    private float gravity[];
+    protected float gravity[];
 
-    private static boolean isDriving = false;
+    protected static boolean isDriving = false;
 
-    private PowerManager.WakeLock wl;
+    protected PowerManager.WakeLock wl;
 
-    private View.OnClickListener setupClickListener = new View.OnClickListener() {
+    protected View.OnClickListener setupClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (v.getId() == btnSetting.getId()) {
@@ -119,35 +120,85 @@ public class CarControlActivity extends AbstractBleControlActivity
         }
     };
 
-    private View.OnTouchListener btnTouchListener = new View.OnTouchListener() {
+    protected JoystickListener joystickLeftListener = new JoystickListener() {
+        @Override
+        public void onDown() {
+            // Nothing
+        }
+
+        @Override
+        public void onDrag(float xOffset, float yOffset) {
+            if (isDriving) {
+                JoypadTankCommand.changeChannel(channelLeftX, mapValue(xOffset));
+                JoypadTankCommand.changeChannel(channelLeftY, mapValue(yOffset));
+                updateCommand();
+            }
+        }
+
+        @Override
+        public void onUp() {
+            if (isDriving) {
+                JoypadTankCommand.changeChannel(channelLeftX, mapValue(0));
+                JoypadTankCommand.changeChannel(channelLeftY, mapValue(0));
+                updateCommand();
+            }
+        }
+    };
+
+    protected JoystickListener joystickRightListener = new JoystickListener() {
+        @Override
+        public void onDown() {
+            // Nothing
+        }
+
+        @Override
+        public void onDrag(float xOffset, float yOffset) {
+            if (isDriving) {
+                JoypadTankCommand.changeChannel(channelRightX, mapValue(xOffset));
+                JoypadTankCommand.changeChannel(channelRightY, mapValue(yOffset));
+                updateCommand();
+            }
+        }
+
+        @Override
+        public void onUp() {
+            if (isDriving) {
+                JoypadTankCommand.changeChannel(channelRightX, mapValue(0));
+                JoypadTankCommand.changeChannel(channelRightY, mapValue(0));
+                updateCommand();
+            }
+        }
+    };
+
+    protected View.OnTouchListener btnTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (v.getId() == button1.getId()) {
-                    JoypadCarCommand.changeChannel(channelBtn1, mapValue(BTN_PRESSED));
+                    JoypadTankCommand.changeChannel(channelBtn1, mapValue(BTN_PRESSED));
                     updateCommand();
                 } else if (v.getId() == button2.getId()) {
-                    JoypadCarCommand.changeChannel(channelBtn2, mapValue(BTN_PRESSED));
+                    JoypadTankCommand.changeChannel(channelBtn2, mapValue(BTN_PRESSED));
                     updateCommand();
                 } else if (v.getId() == button3.getId()) {
-                    JoypadCarCommand.changeChannel(channelBtn3, mapValue(BTN_PRESSED));
+                    JoypadTankCommand.changeChannel(channelBtn3, mapValue(BTN_PRESSED));
                     updateCommand();
                 } else if (v.getId() == button4.getId()) {
-                    JoypadCarCommand.changeChannel(channelBtn4, mapValue(BTN_PRESSED));
+                    JoypadTankCommand.changeChannel(channelBtn4, mapValue(BTN_PRESSED));
                     updateCommand();
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
                 if (v.getId() == button1.getId()) {
-                    JoypadCarCommand.changeChannel(channelBtn1, mapValue(BTN_UNPRESSED));
+                    JoypadTankCommand.changeChannel(channelBtn1, mapValue(BTN_UNPRESSED));
                     updateCommand();
                 } else if (v.getId() == button2.getId()) {
-                    JoypadCarCommand.changeChannel(channelBtn2, mapValue(BTN_UNPRESSED));
+                    JoypadTankCommand.changeChannel(channelBtn2, mapValue(BTN_UNPRESSED));
                     updateCommand();
                 } else if (v.getId() == button3.getId()) {
-                    JoypadCarCommand.changeChannel(channelBtn3, mapValue(BTN_UNPRESSED));
+                    JoypadTankCommand.changeChannel(channelBtn3, mapValue(BTN_UNPRESSED));
                     updateCommand();
                 } else if (v.getId() == button4.getId()) {
-                    JoypadCarCommand.changeChannel(channelBtn4, mapValue(BTN_UNPRESSED));
+                    JoypadTankCommand.changeChannel(channelBtn4, mapValue(BTN_UNPRESSED));
                     updateCommand();
                 }
             }
@@ -158,7 +209,7 @@ public class CarControlActivity extends AbstractBleControlActivity
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.car_control);
+        // setContentView(R.layout.tank_control);
         super.onCreate(savedInstanceState);
 
         // Initializing the gravity vector to zero.
@@ -203,62 +254,16 @@ public class CarControlActivity extends AbstractBleControlActivity
 
         joystickLeft = (Joystick) findViewById(R.id.joystick_left);
         stickLeft = (Button) findViewById(R.id.stick_left);
-        joystickLeft.setJoystickListener(new JoystickListener() {
-            @Override
-            public void onDown() {
-                // Nothing
-            }
-
-            @Override
-            public void onDrag(float xOffset, float yOffset) {
-                if (isDriving) {
-                    JoypadCarCommand.changeChannel(channelLeftX, mapValue(xOffset));
-                    JoypadCarCommand.changeChannel(channelLeftY, mapValue(yOffset));
-                    updateCommand();
-                }
-            }
-
-            @Override
-            public void onUp() {
-                if (isDriving) {
-                    JoypadCarCommand.changeChannel(channelLeftX, mapValue(0));
-                    JoypadCarCommand.changeChannel(channelLeftY, mapValue(0));
-                    updateCommand();
-                }
-            }
-        });
+        joystickLeft.setJoystickListener(joystickLeftListener);
 
         joystickRight = (Joystick) findViewById(R.id.joystick_right);
         stickRight = (Button) findViewById(R.id.stick_right);
-        joystickRight.setJoystickListener(new JoystickListener() {
-            @Override
-            public void onDown() {
-                // Nothing
-            }
-
-            @Override
-            public void onDrag(float xOffset, float yOffset) {
-                if (isDriving) {
-                    JoypadCarCommand.changeChannel(channelRightX, mapValue(xOffset));
-                    JoypadCarCommand.changeChannel(channelRightY, mapValue(yOffset));
-                    updateCommand();
-                }
-            }
-
-            @Override
-            public void onUp() {
-                if (isDriving) {
-                    JoypadCarCommand.changeChannel(channelRightX, mapValue(0));
-                    JoypadCarCommand.changeChannel(channelRightY, mapValue(0));
-                    updateCommand();
-                }
-            }
-        });
+        joystickRight.setJoystickListener(joystickRightListener);
 
         // Getting a WakeLock. This insures that the phone does not sleep
         // while driving the robot.
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "mTank");
+        wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "mDrone");
         wl.acquire();
 
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
@@ -277,7 +282,7 @@ public class CarControlActivity extends AbstractBleControlActivity
         new DoRead().execute(currWebCamAdr);
     }
 
-    private void captureMjpegView() {
+    protected void captureMjpegView() {
         try {
             Date now = new Date();
             String filename = now.getTime() + ".jpg";
@@ -292,19 +297,15 @@ public class CarControlActivity extends AbstractBleControlActivity
         }
     }
 
-    private void readSetting() {
-        rightHand = settings.getBoolean(SettingFragment.SET_RIGHT_HAND, true);
+    protected void readSetting() {
+        rightHand = settings.getBoolean(AbstractSettingFragment.SET_RIGHT_HAND, true);
 
-        blockSendInterval = settings.getInt(SettingFragment.SET_BLOCK_SEND_INTERVAL, BLE_BLOCK_SEND_INTERVAL);
-        msgSendInterval = settings.getInt(SettingFragment.SET_BLE_SEND_INTERVAL, BLE_MSG_SEND_INTERVAL);
-        bleTimerInterval = blockSendInterval + msgSendInterval + PROCESSING_TIME;
-
-        currDeviceAddress = settings.getString(SettingFragment.SET_BLE_ADDRESS, null);
-        String webCam = settings.getString(SettingFragment.SET_WEB_CAM_ADDRESS, "192.168.1.1:8080");
+        currDeviceAddress = settings.getString(AbstractSettingFragment.SET_BLE_ADDRESS, null);
+        String webCam = settings.getString(AbstractSettingFragment.SET_WEB_CAM_ADDRESS, "192.168.1.1:8080");
         currWebCamAdr = "http://" + webCam + "/?action=stream";
     }
 
-    private void changeHand(boolean isRight) {
+    protected void changeHand(boolean isRight) {
         this.rightHand = isRight;
         if (rightHand) {
             channelRightX = STEERING;
@@ -358,22 +359,26 @@ public class CarControlActivity extends AbstractBleControlActivity
         }
     }
 
-    private void buttonEnable(boolean enable) {
+    protected void buttonEnable(boolean enable) {
         button1.setEnabled(enable);
         button2.setEnabled(enable);
         button3.setEnabled(enable);
         button4.setEnabled(enable);
     }
 
-    private short mapValue(float offset) {
-        return (short) (offset * threshold + 1500);
+    protected short mapValue(float offset) {
+        return (short) (offset * threshold + JOYSTICK_MIDDLE);
+    }
+
+    protected short mapFullValue(float offset) {
+        return (short) (offset * JOYSTICK_FULL_THRESHOLD + JOYSTICK_MIDDLE);
     }
 
     protected void updateCommand() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                commandView.setText(JoypadCarCommand.toHexString());
+                commandView.setText(JoypadTankCommand.toHexString());
             }
         });
     }
@@ -434,7 +439,7 @@ public class CarControlActivity extends AbstractBleControlActivity
         });
     }
 
-    void updateUIXyz(final byte x, final byte y, final byte z) {
+    protected void updateUIXyz(final byte x, final byte y, final byte z) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -481,11 +486,7 @@ public class CarControlActivity extends AbstractBleControlActivity
     // Setting Fragment
     /////////////////////
 
-    private void showSettingFragment() {
-        FragmentManager fm = getFragmentManager();
-        SettingFragment frag = SettingFragment.newInstance();
-        frag.show(fm, "Setting");
-    }
+    abstract protected void showSettingFragment();
 
     @Override
     public void settingChanged() {
@@ -509,65 +510,10 @@ public class CarControlActivity extends AbstractBleControlActivity
     /////////////////////
 
     public static boolean sendingLock = false;
-    // long last_time0 = (new Date()).getTime() ;
 
-    private Timer startSentCmdTimer(long delay, long period) {
-        final Timer mTimer = new Timer();
-        mTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                long time0 = (new Date()).getTime(), time1 = 0;
-                // Log.v("BBuffer sub : between 2 msgs : ", ""+ (time0 - last_time0));
-                // last_time0 = time0;
+    abstract protected Timer startSentCmdTimer(long delay, long period);
 
-                if (!sendingLock) {
-                    sendingLock = true;
-
-                    byte[] cmd = JoypadCarCommand.compose();
-
-                    try {
-                        // long time0_0 = (new Date()).getTime(), time1_0 = 0;
-
-                        // Microduino BLE firmware only can use 18 bytes buffer, so I have to split the message.
-                        int bufferlen = BLE_MSG_BUFFER_LEN;
-                        byte[] buffer;
-
-                        synchronized (cmd) {
-                            for (int offset = 0; offset < cmd.length; offset += BLE_MSG_BUFFER_LEN) {
-                                if (offset > 0) {
-                                    wait_ble(blockSendInterval);
-                                }
-
-                                bufferlen = Math.min(BLE_MSG_BUFFER_LEN, cmd.length - offset);
-                                buffer = new byte[bufferlen];
-
-                                System.arraycopy(cmd, offset, buffer, 0, bufferlen);
-
-                                // Log.v("BBuffer sub", offset + " : " + JoypadCarCommand.byteArrayToHexString(buffer));
-                                sendMessage(buffer);
-
-                                buffer = null;
-
-                                // time1_0 = (new Date()).getTime();
-                                // Log.v("BBuffer sub : block : ", offset + " : " + (time1_0 - time0_0));
-                            }
-                            wait_ble(msgSendInterval);
-                        }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    sendingLock = false;
-                }
-
-                // time1 = (new Date()).getTime();
-                // Log.v("BBuffer sub : msg : ", ""+ (time1 - time0));
-            }
-        }, delay, period);
-        return mTimer;
-    }
-
-    private void stopTimer(Timer mTimer) {
+    protected void stopTimer(Timer mTimer) {
         if (mTimer != null) {
             mTimer.cancel();
             mTimer = null;
@@ -578,7 +524,7 @@ public class CarControlActivity extends AbstractBleControlActivity
     // Read Mjpeg Stream
     /////////////////////
 
-    private class DoRead extends AsyncTask<String, Void, MjpegInputStream> {
+    protected class DoRead extends AsyncTask<String, Void, MjpegInputStream> {
         protected MjpegInputStream doInBackground(String... url) {
             //TODO: if camera has authentication deal with it and don't just not work
             HttpResponse res = null;

@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/bugstick/bugstick.iml" filepath="$PROJECT_DIR$/bugstick/bugstick.iml" />
-      <module fileurl="file://$PROJECT_DIR$/microduino_mTank_android.iml" filepath="$PROJECT_DIR$/microduino_mTank_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mDroneAndroid.iml" filepath="$PROJECT_DIR$/mDroneAndroid.iml" />
     </modules>
   </component>
 </project>
