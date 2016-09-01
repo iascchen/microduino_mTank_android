@@ -1,33 +1,35 @@
-# microduino_mTank_android
-
-Microduino mTank APP, Android version
+# Microduino mCar Android
 
 ## Features
 
-Control tank via BLE 4.0, working with Microduino BLE Module。
+基于 Microduino BLE 蓝牙实现。
 
-[x]. Control tank forward, back, and turn left/right.
+[x]. 控制小车的前进、后退和转弯。
 
-[x]. Control the platform of camera up/down and left/right。
+[x]. 控制车载云台的俯仰、旋转。
 
-[x]. Use function button to fire gun.
+[x]. 控制小车发炮等其他功能。
 
-View the camera, working with Microduino MicroWrt：
+基于 MicroWrt Wifi 实现：
 
-[x]. View the video stream on phone's screen。
+[x]. 连接架设在云台上的 MicroWrt 和 Wifi Camera，并在屏幕上显示。
 
-[x]. Capture the view to phone's photo album。
+[x]. 拍照并存放到手机照片集中。
 
-VR 
+VR 功能
 
-[ ]. Display 2-channel video stream in Cardboard。
+[ ]. 利用 Cardboard 显示双摄像头返回的视频流。
 
-[ ]. Control tank by physical joystick。
+[ ]. 增加手持摇杆支持。
 
-Other：
+其它功能：
 
-[x]. Change control hand。
-Reference：[http://www.crazepony.com/wiki/japan-american-rc.html](http://www.crazepony.com/wiki/japan-american-rc.html)
+[x]. 支持“美国手（左手油门）”和“日本手（右手油门）”的切换。
+请参考：[http://www.crazepony.com/wiki/japan-american-rc.html](http://www.crazepony.com/wiki/japan-american-rc.html)
+
+## TODO
+
+
 
 ## Related Hardware
 
@@ -42,24 +44,25 @@ Reference：[http://www.crazepony.com/wiki/japan-american-rc.html](http://www.cr
 
 ## Control Protocol
 
-BLE control protocol modified from 8 channels WMC protocol:
+BLE 小车控制参考 8 通道 WMC 协议。协议标准如下：
 
-### Protocol Message Format：
+### 协议数据格式：
 
     [head][code][data][checksum]
     
-    * head : 2 bytes: 0xAA,0xBB
-    * code : means this is a control message, 1 byte：0xC8
-    * data : data of channels, 16 bytes. 2 bytes each channel, the value of a channel is from 1000 to 2000
+    * head是固定的，是数据头：[占两个字节]，十六进制为0xAA,0xBB；
+    * code是指令代码：[占一个字节]，十六进制为0xC8，十进制为200
+    * data是遥控通道数据：[占十六个字节]，每个通道的数值范围为1000~2000
     
         一共八个通道数据：小车转向, 小车油门, 云台旋转, 云台俯仰, aux1, aux2, aux3, aux4
         每个数据占2个字节，低位在前，比如：0xdc 0x05数据；数据是低位在前，所以0x05 0xdc是数据，值是1500
         
-    * checksum ：1 byte
+    * checksum为校验位：[占一个字节]
     
-        Check sample code is ：
+        校验程序：
         
             byte getChecksum(byte length,byte cmd,byte mydata[]) { 
+                //三个参数分别为： 数据长度（16）  ，  指令代码（200），  实际数据数组
                 byte checksum=0;
                 checksum ^= (length&0xFF);
                 checksum ^= (cmd&0xFF);
@@ -68,14 +71,14 @@ BLE control protocol modified from 8 channels WMC protocol:
                 return checksum;
             }
             
-        Call this method：
+        调用：
             
             byte check_sum=getChecksum(16,200,data);
     
-    Sample Message：[22 bytes]
+    示例代码：[一共二十二个字节]
     
-        Send    :                1500,     1500,     2000,     1007,     1500,     1500,     1500,     1500 
-        Message : 0xAA,0xBB,0xC8,0xDC,0x05,0xDC,0x05,0xD0,0x07,0xEF,0x03,0xDC,0x05,0xDC,0x05,0xDC,0x05,0xDC,0x05,0xE3
+        发送：1500,1500,2000,1007,1500,1500,1500,1500八个通道数据
+        0xAA,0xBB,0xC8,0xDC,0x05,0xDC,0x05,0xD0,0x07,0xEF,0x03,0xDC,0x05,0xDC,0x05,0xDC,0x05,0xDC,0x05,0xE3
 
 ## Microduino Program
 
@@ -99,7 +102,7 @@ BLE control protocol modified from 8 channels WMC protocol:
     
         http://192.168.1.1:8080/?action=stream
 
-3. 打开 mTank App，进行设置：
+3. 打开 mCar App，进行设置：
 
     点按屏幕中间的 M 图标，打开设置界面，你可以在此：
     
@@ -114,10 +117,10 @@ BLE control protocol modified from 8 channels WMC protocol:
     
 4. 控制界面
 
-        * 油门摇控杆
-        * 云台摇控杆
+        * 油门摇控杆黄色
+        * 云台摇控杆蓝色
         * 如果 Web Camera 连接成功，会在屏幕右上角显示拍照按钮
-        * 下方功能按钮分别是：发炮
+        * 下方四个功能按钮分别是：发炮、。。。
 
 ## Used 3rd Lib
 

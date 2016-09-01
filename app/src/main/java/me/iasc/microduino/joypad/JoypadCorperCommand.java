@@ -17,32 +17,32 @@
 
 package me.iasc.microduino.joypad;
 
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
  * These commands is compatible
  */
-public class JoypadDroneCommand extends JoypadCommand {
-    private final static String TAG = JoypadDroneCommand.class.getSimpleName();
+public class JoypadCorperCommand {
+    private final static String TAG = JoypadCorperCommand.class.getSimpleName();
 
     static final byte[] CMD_HEAD = {0x24, 0x4d, 0x3c};
     static final byte CMD_CODE = (byte) 0xc8;
 
-//    static final byte CHANNEL_COUNT = 8;
-//    static final byte CHANNEL_LEN = CHANNEL_COUNT * 2; // CHANNEL_COUNT * Short.SIZE / Byte.SIZE;
+    static final byte CHANNEL_COUNT = 8;
+    static final byte CHANNEL_LEN = CHANNEL_COUNT * 2; // CHANNEL_COUNT * Short.SIZE / Byte.SIZE;
     static final byte CMD_LEN = 6 + CHANNEL_LEN;
 
     public static final int LR = 0, FB = 1, ROTATE = 2, POWER = 3;
 
-//    public static short[] channel = {1500, 1500, 1000, 1500, 1000, 1000, 1000, 1000};
+    public static short[] channel = {1500, 1500, 1000, 1500, 1000, 1000, 1000, 1000};
 
     public static short[] UNLOCK_CMD = {1500, 1500, 2000, 1000, 1500, 1500, 1500, 1500};
-    public static short[] LOCK_CMD = {1500, 1500, 1000, 1000, 1500, 1500, 1500, 1500};
-
     public static short[] NORMAL_CMD = {1500, 1500, 1500, 1150, 1000, 1000, 1000, 1000};
     public static short[] DOWN_CMD = {1500, 1500, 1500, 1200, 1000, 1000, 1000, 1000};
-
+    public static short[] LOCK_CMD = {1500, 1500, 1000, 1000, 1500, 1500, 1500, 1500};
 
     public static byte[] compose() {
 
@@ -68,20 +68,20 @@ public class JoypadDroneCommand extends JoypadCommand {
         return bbuffer.array();
     }
 
-//    public static byte getChecksum(byte length, byte cmd, byte mydata[]) {
-//        byte checksum = 0;
-//        checksum ^= (length & 0xFF);
-//        checksum ^= (cmd & 0xFF);
-//        for (int i = 0; i < length; i++)
-//            checksum ^= (mydata[i] & 0xFF);
-//        return checksum;
-//    }
-//
-//    public static void resetChannel(short[] cmd) {
-//        for (int i = 0; i < CHANNEL_COUNT; i++) {
-//            channel[i] = cmd[i];
-//        }
-//    }
+    public static byte getChecksum(byte length, byte cmd, byte mydata[]) {
+        byte checksum = 0;
+        checksum ^= (length & 0xFF);
+        checksum ^= (cmd & 0xFF);
+        for (int i = 0; i < length; i++)
+            checksum ^= (mydata[i] & 0xFF);
+        return checksum;
+    }
+
+    public static void resetChannel(short[] cmd) {
+        for (int i = 0; i < CHANNEL_COUNT; i++) {
+            channel[i] = cmd[i];
+        }
+    }
 
 //    public static short minusPower() {
 //        int value = channel[POWER] - 100;
@@ -99,16 +99,16 @@ public class JoypadDroneCommand extends JoypadCommand {
 //        return channel[POWER];
 //    }
 
-//    public static void changeChannel(int index, int value) {
-//        channel[index] = (short) value;
-//    }
-//
-//    public static String byteArrayToHexString(byte[] a) {
-//        StringBuilder sb = new StringBuilder(a.length * 2);
-//        for (byte b : a)
-//            sb.append(String.format("%02x", b & 0xff));
-//        return sb.toString();
-//    }
+    public static void changeChannel(int index, int value) {
+        channel[index] = (short) value;
+    }
+
+    public static String byteArrayToHexString(byte[] a) {
+        StringBuilder sb = new StringBuilder(a.length * 2);
+        for (byte b : a)
+            sb.append(String.format("%02x", b & 0xff));
+        return sb.toString();
+    }
 
     public static String toHexString() {
         return byteArrayToHexString(compose());

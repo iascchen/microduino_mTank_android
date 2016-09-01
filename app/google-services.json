@@ -1,17 +1,18 @@
 {
   "project_info": {
-    "project_id": "mtank-4fcce",
-    "project_number": "921492174639",
+    "project_id": "mtank-1d7b",
+    "project_number": "772458058520",
     "name": "mTank"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:921492174639:android:05873a70ff9cd5de",
+        "mobilesdk_app_id": "1:772458058520:android:05873a70ff9cd5de",
         "client_id": "android:me.iasc.microduino.mcar.app",
         "client_type": 1,
         "android_client_info": {
-          "package_name": "me.iasc.microduino.mcar.app"
+          "package_name": "me.iasc.microduino.mcar.app",
+          "certificate_hash": []
         }
       },
       "oauth_client": [],

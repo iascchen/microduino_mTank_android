@@ -6,10 +6,6 @@
     <string name="control">控制</string>
     <string name="control_left">左手控车</string>
     <string name="control_right">右手控车</string>
-
-    <string name="control_us">美国手</string>
-    <string name="control_jp">日本手</string>
-
     <string name="ble">蓝牙</string>
     <string name="web_cam">WIFI 摄像头</string>
     <string name="save">保存</string>
@@ -30,6 +26,6 @@
     <string name="menu_scan">扫描</string>
     <string name="menu_stop">停止</string>
     <string name="is_serial">Serial Present:</string>
-    <string name="app_name">mDrone</string>
+    <string name="app_name">mTank</string>
 
 </resources>

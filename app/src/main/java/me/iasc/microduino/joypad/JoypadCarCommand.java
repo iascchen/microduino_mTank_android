@@ -23,8 +23,8 @@ import java.nio.ByteOrder;
 /**
  * These commands is compatible
  */
-public class JoypadTankCommand {
-    private final static String TAG = JoypadTankCommand.class.getSimpleName();
+public class JoypadCarCommand {
+    private final static String TAG = JoypadCarCommand.class.getSimpleName();
 
     static final byte[] CMD_HEAD = {(byte)0xaa, (byte)0xbb};
     static final byte CMD_CODE = (byte) 0xc8;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.iasc.microduino.mdrone.app;
+package me.iasc.microduino.mcar.app;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -27,11 +27,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.android.gms.analytics.Tracker;
 import me.iasc.microduino.ble.BleAsyncTask;
 import me.iasc.microduino.ble.BluetoothLeService;
 import me.iasc.microduino.ble.MyGattCharacteristic;
 import me.iasc.microduino.ble.MyGattService;
-import me.iasc.microduino.joypad.JoypadTankCommand;
+import me.iasc.microduino.joypad.JoypadCarCommand;
 
 public abstract class AbstractBleControlActivity extends Activity {
     private final static String TAG = AbstractBleControlActivity.class.getSimpleName();
@@ -219,7 +220,7 @@ public abstract class AbstractBleControlActivity extends Activity {
 
     protected void displayData(byte[] data) {
         if (data != null) {
-            Log.v(TAG, "BLE Return Data : " + JoypadTankCommand.byteArrayToHexString(data));
+            Log.v(TAG, "BLE Return Data : " + JoypadCarCommand.byteArrayToHexString(data));
         }
     }
 

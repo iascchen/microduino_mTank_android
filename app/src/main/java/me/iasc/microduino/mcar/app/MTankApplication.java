@@ -1,4 +1,4 @@
-package me.iasc.microduino.mdrone.app;
+package me.iasc.microduino.mcar.app;
 
 /**
  * Copyright (C) 2015 Iasc CHEN
@@ -21,6 +21,10 @@ import android.app.Application;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
 
+/**
+ * This is a subclass of {@link Application} used to provide shared objects for this app, such as
+ * the {@link Tracker}.
+ */
 public class MTankApplication extends Application {
     public static final String TAG = MTankApplication.class.getSimpleName();
 
@@ -34,7 +38,7 @@ public class MTankApplication extends Application {
         if (mTracker == null) {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
             // To enable debug logging use: adb shell setprop log.tag.GAv4 DEBUG
-            mTracker = analytics.newTracker(R.xml.app_tracker);
+            mTracker = analytics.newTracker(R.xml.global_tracker);
         }
         return mTracker;
     }
