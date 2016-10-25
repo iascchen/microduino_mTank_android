@@ -34,11 +34,7 @@ public class BleReturnDataProcessor {
         String ret = null;
 
         // TODO: Please add your code, access more characteristics
-        if (MyGattCharacteristic.BLE_DOWNLOAD_IMAGE_NOTIFY.equals(characteristicUuid)) {
-            ret = EXTRA_IMAGE_NOTIFY;
-        } else if (MyGattCharacteristic.BLE_DOWNLOAD_IMAGE_BLOCK.equals(characteristicUuid)) {
-            ret = EXTRA_IMAGE_BLOCK;
-        } else if (MyGattCharacteristic.MD_RX_TX.equals(characteristicUuid)) {
+        if (MyGattCharacteristic.MD_RX_TX.equals(characteristicUuid)) {
             ret = EXTRA_RX_TX;
         }
 

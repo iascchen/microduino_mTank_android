@@ -27,11 +27,11 @@ public class MyGattService {
     private static HashMap<UUID, String> attributes = new HashMap<UUID, String>();
 
     public static final UUID SOFT_SERIAL_SERVICE = new UUID((0xFFF0L << 32) | 0x1000, GattUtils.leastSigBits);
-    public static final UUID BLE_DOWNLOAD_SERVICE = new UUID((0xF0C0L << 32) | 0x1000, GattUtils.leastSigBits);
+//    public static final UUID BLE_DOWNLOAD_SERVICE = new UUID((0xFFE0L << 32) | 0x1000, GattUtils.leastSigBits);
 
     static {
         attributes.put(SOFT_SERIAL_SERVICE, "Microduino BLE Serial");
-        attributes.put(BLE_DOWNLOAD_SERVICE, "Microduino BLE Uploader");
+//        attributes.put(BLE_DOWNLOAD_SERVICE, "Microduino BLE Uploader");
     }
 
     public static String lookup(UUID uuid, String defaultName) {

@@ -16,6 +16,7 @@
 
 package me.iasc.microduino.mcar.app;
 
+import android.Manifest;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -299,6 +301,8 @@ public class CarControlActivity extends AbstractBleControlActivity
 
         Log.d(TAG, currWebCamAdr);
         new DoRead().execute(currWebCamAdr);
+
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN,Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
     }
 
     private void captureMjpegView() {

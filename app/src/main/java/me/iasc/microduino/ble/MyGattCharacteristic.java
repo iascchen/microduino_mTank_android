@@ -29,14 +29,14 @@ public class MyGattCharacteristic {
     public static final UUID MD_RX_TX = new UUID((0xFFF6L << 32) | 0x1000, GattUtils.leastSigBits);
     public static final UUID ETOH_RX_TX = new UUID((0xFFF1L << 32) | 0x1000, GattUtils.leastSigBits);
 
-    public static final UUID BLE_DOWNLOAD_IMAGE_NOTIFY = new UUID((0xF0C1L << 32) | 0x1000, GattUtils.leastSigBits);
-    public static final UUID BLE_DOWNLOAD_IMAGE_BLOCK = new UUID((0xF0C2L << 32) | 0x1000, GattUtils.leastSigBits);
+//    public static final UUID BLE_DOWNLOAD_IMAGE_NOTIFY = new UUID((0xF0C1L << 32) | 0x1000, GattUtils.leastSigBits);
+//    public static final UUID BLE_DOWNLOAD_IMAGE_BLOCK = new UUID((0xF0C2L << 32) | 0x1000, GattUtils.leastSigBits);
 
     static {
         attributes.put(MD_RX_TX, "Microduino BLE Serial");
 
-        attributes.put(BLE_DOWNLOAD_IMAGE_NOTIFY, "Image Notify");
-        attributes.put(BLE_DOWNLOAD_IMAGE_BLOCK, "Image Block");
+//        attributes.put(BLE_DOWNLOAD_IMAGE_NOTIFY, "Image Notify");
+//        attributes.put(BLE_DOWNLOAD_IMAGE_BLOCK, "Image Block");
     }
 
     public static String lookup(UUID uuid, String defaultName) {
